@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HardGo - Fast Electrical & Electronics Delivery</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet CSS for Map Tracking -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- App Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Secure role-based app: staff modules are available only after role-protected login. -->
+    <!-- 2. App Main Navbar -->
+    <header class="app-navbar">
+        <a href="/" class="brand-logo">
+            <div class="brand-icon"><i class="fas fa-bolt"></i></div>
+            <div>Hard<span class="highlight">Go</span></div>
+        </a>
+
+        <div class="nav-location-pill" onclick="showToast('Current Location: Benz Circle, Vijayawada', 'info')">
+            <i class="fas fa-map-marker-alt" style="color:var(--accent-electric);"></i>
+            <div>
+                <div style="font-size:0.7rem; color:var(--text-secondary); line-height:1;">DELIVERING TO</div>
+                <div style="font-weight:700; font-size:0.85rem;" id="nav-location-text">Benz Circle, Vijayawada ⚡ 10 min</div>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <span id="current-user-name" style="font-size:.85rem;color:var(--text-secondary);margin-right:10px;"></span>
+            <button class="btn-icon" id="btn-logout" title="Logout" style="width:42px;height:42px;">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+            <button class="btn-icon" id="btn-cart" title="Shopping Cart">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-badge" id="cart-count-badge" style="display:none;">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 3. Main View Container -->
+    <main class="main-content">
+
+        <!-- ===================================================================
+             VIEW 1: CUSTOMER APP VIEW
+             =================================================================== -->
+        <div id="view-customer" class="role-view-container">
+
+            <!-- Hero Search Header -->
+            <div class="search-hero">
+                <h1 class="hero-title">Hyperlocal Electrical & Electronics <span>Delivered in Minutes</span></h1>
+                <p class="hero-subtitle">Direct live stock from trusted nearby shops in Vijayawada. No warehouse delay.</p>
+
+                <div class="search-bar-container">
+                    <i class="fas fa-search" style="color:var(--text-muted); font-size:1.2rem; align-self:center; margin-left:6px;"></i>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search '12W LED bulb', '6A switch', 'fast charger', 'copper wire', 'multimeter'...">
+
+                    <button class="btn-ai-search" id="btn-ai-search">
+                        <i class="fas fa-camera"></i> AI Visual Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categories Horizontal Strip -->
+            <div class="category-strip" id="category-strip">
+                <!-- Loaded dynamically by JS -->
+            </div>
+
+            <!-- Products Section -->
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-bolt"></i> Nearby Available Products</h2>
+                <div style="font-size:0.85rem; color:var(--text-secondary);">Sorted by Availability & Distance</div>
+            </div>
+
+            <div class="product-grid" id="customer-product-grid">
+                <!-- Products loaded dynamically by JS -->
+            </div>
+
+            <!-- AI Recommendations Widget -->
+            <div class="section-header" style="margin-top:32px;">
+                <h2 class="section-title"><i class="fas fa-brain"></i> AI Recommended Accessories</h2>
+                <div style="font-size:0.85rem; color:var(--text-secondary);">Frequently Bought Together</div>
+            </div>
+            <div id="ai-recommendations-strip" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                <!-- AI Recommendations loaded dynamically -->
+            </div>
+
+            <!-- Customer Past Orders List -->
+            <div class="section-header" style="margin-top:36px;">
+                <h2 class="section-title"><i class="fas fa-history"></i> My Recent Orders</h2>
+            </div>
+            <div id="customer-orders-list">
+                <!-- Orders loaded dynamically -->
+            </div>
+
+        </div>
+
+        <!-- ===================================================================
+             VIEW 2: SHOP OWNER DASHBOARD
+             =================================================================== -->
+        <div id="view-shop-owner" class="role-view-container" style="display:none;">
+
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-store"></i> Shop Owner Dashboard - Sri Sai Electricals</h2>
+                <span class="status-pill status-ready">🟢 Live Online</span>
+            </div>
+
+            <!-- AI Demand Prediction Alert Banner -->
+            <div style="margin-bottom:24px;">
+                <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-chart-line" style="color:var(--accent-electric);"></i> AI Demand Predictions & Restock Insights
+                </h3>
+                <div id="shop-ai-demand-container">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Incoming Live Orders -->
+            <div style="margin-bottom:28px;">
+                <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;"><i class="fas fa-bell"></i> Live Incoming Orders</h3>
+                <div id="shop-orders-list">
+                    <!-- Orders loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Inventory Stock Management Table -->
+            <div>
+                <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px;"><i class="fas fa-boxes"></i> Shop Live Inventory Control</h3>
+                <div class="table-card">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Unit Price (₹)</th>
+                                <th>Stock Qty</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shop-inventory-tbody">
+                            <!-- Loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================================================================
+             VIEW 3: DELIVERY PARTNER DASHBOARD
+             =================================================================== -->
+        <div id="view-delivery-partner" class="role-view-container" style="display:none;">
+
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-motorcycle"></i> Delivery Partner Dashboard - Raju Express</h2>
+                <div class="stat-card" style="padding:8px 16px;">
+                    <div style="font-size:0.8rem; color:var(--text-secondary);">Earnings Today</div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--accent-green);">₹1,250.00</div>
+                </div>
+            </div>
+
+            <div id="delivery-requests-list">
+                <!-- Delivery requests loaded dynamically -->
+            </div>
+
+        </div>
+
+        <!-- ===================================================================
+             VIEW 4: ADMIN DASHBOARD
+             =================================================================== -->
+        <div id="view-admin" class="role-view-container" style="display:none;">
+
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-user-shield"></i> HardGo Platform Admin Panel</h2>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="stat-val" id="admin-val-customers">0</div>
+                        <div class="stat-lbl">Customers</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-store"></i></div>
+                    <div>
+                        <div class="stat-val" id="admin-val-shops">0</div>
+                        <div class="stat-lbl">Active Shops</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div>
+                        <div class="stat-val" id="admin-val-orders">0</div>
+                        <div class="stat-lbl">Total Orders</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:var(--accent-green);"><i class="fas fa-rupee-sign"></i></div>
+                    <div>
+                        <div class="stat-val" id="admin-val-revenue">₹0</div>
+                        <div class="stat-lbl">Platform Revenue</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Recent Orders Table -->
+            <h3 style="font-weight:800; margin-bottom:12px;">System Recent Orders</h3>
+            <div class="table-card">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Shop</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-orders-tbody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- 4. Footer -->
+    <footer class="app-footer">
+        <p>HardGo Electrical & Electronics Delivery Platform &copy; 2026. Built with Python, Flask, OpenCV & Scikit-learn.</p>
+        <p style="margin-top:4px; font-size:0.75rem;">Fast hyperlocal shop-to-customer direct delivery.</p>
+    </footer>
+
+    <!-- ===================================================================
+         MODALS (AI Search, Cart, Shop Comparison, Live Tracking)
+         =================================================================== -->
+
+    <!-- Modal 1: AI Visual Search Modal -->
+    <div class="modal-overlay" id="modal-ai-search">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-camera" style="color:var(--accent-electric);"></i> AI Product Image Search
+                </h3>
+                <button type="button" class="btn-close-modal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:16px;">
+                Upload a photo of an electrical item or select a quick visual sample to analyze OpenCV color & edge features:
+            </p>
+
+            <div style="margin-bottom:16px;">
+                <input type="file" id="ai-file-input" accept="image/*" class="search-input" style="width:100%; background:var(--bg-main); border:1px dashed var(--border-bright);">
+            </div>
+
+            <div style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); margin-bottom:8px;">OR SELECT QUICK VISUAL SAMPLES:</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                <button class="btn-role-switch" onclick="processAiVisualSearch('led_bulb')">💡 LED Bulb</button>
+                <button class="btn-role-switch" onclick="processAiVisualSearch('switch')">🔘 6A Switch</button>
+                <button class="btn-role-switch" onclick="processAiVisualSearch('charger')">🔌 Fast Charger</button>
+                <button class="btn-role-switch" onclick="processAiVisualSearch('soldering_iron')">🛠️ Soldering Iron</button>
+                <button class="btn-role-switch" onclick="processAiVisualSearch('multimeter')">📟 Multimeter</button>
+            </div>
+
+            <button class="btn-add-cart" style="width:100%; padding:10px;" onclick="processAiVisualSearch()">Analyze Image & Find Stock</button>
+
+            <div id="ai-visual-result"></div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Shopping Cart Modal -->
+    <div class="modal-overlay" id="modal-cart">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-shopping-bag" style="color:var(--accent-electric);"></i> Your Shopping Cart
+                </h3>
+                <button type="button" class="btn-close-modal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="cart-modal-body">
+                <!-- Cart items loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Shop Stock Comparison Modal -->
+    <div class="modal-overlay" id="modal-shop-compare">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div></div>
+                <button type="button" class="btn-close-modal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="shop-compare-modal-body">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Live Order Tracking Modal -->
+    <div class="modal-overlay" id="modal-tracking">
+        <div class="modal-content" style="max-width:650px;">
+            <div class="modal-header">
+                <h3 style="font-weight:800;"><i class="fas fa-route" style="color:var(--accent-electric);"></i> Live Order Delivery Tracking</h3>
+                <button type="button" class="btn-close-modal" aria-label="Close"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="tracking-modal-body">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet/OpenStreetMap map: no Google API key required. -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
